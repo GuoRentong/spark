@@ -18,6 +18,8 @@ case class ForbiddenDescSorts(spark: SparkSession) extends Rule[LogicalPlan] {
   }
 }
 
+
+
 // scalastyle:off println
 object AggNaiveTest {
   def main(args: Array[String]): Unit = {
@@ -28,8 +30,7 @@ object AggNaiveTest {
     val spark = SparkSession
       .builder
       .appName("AggNaive")
-      .config("pa")
-      //      .withExtensions(f)
+      .withExtensions(f)
       .getOrCreate()
 
     spark.udf.register("fuck", (s: Long) => s * s)
@@ -42,7 +43,7 @@ object AggNaiveTest {
       .toDF("b", "c")
 
     df.createOrReplaceTempView("tt")
-    val res = spark.sql("select sum(fuck(b) + c) from tt");
+    val res = spark.sql("select sum(fuck(b)) from tt");
 
     res.explain(ExplainMode.Extended)
     val dbgInfo = res.toString()
