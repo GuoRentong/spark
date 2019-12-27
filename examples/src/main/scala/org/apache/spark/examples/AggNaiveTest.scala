@@ -19,7 +19,6 @@ case class ForbiddenDescSorts(spark: SparkSession) extends Rule[LogicalPlan] {
 }
 
 
-
 // scalastyle:off println
 object AggNaiveTest {
   def main(args: Array[String]): Unit = {
@@ -43,7 +42,7 @@ object AggNaiveTest {
       .toDF("b", "c")
 
     df.createOrReplaceTempView("tt")
-    val res = spark.sql("select sum(fuck(b)) from tt");
+    val res = spark.sql("select fuck(fuck(b)) from tt");
 
     res.explain(ExplainMode.Extended)
     val dbgInfo = res.toString()
