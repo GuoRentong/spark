@@ -1076,7 +1076,7 @@ object SQLConf {
     .createOptional
 
   val FORCE_DELETE_TEMP_CHECKPOINT_LOCATION =
-    buildConf("spark.sql.streaming.forceDeleteTempCheckpointLocation")
+    buildConf("spark.sql.streaming.forceDeleteTempCheckpointLocation.enabled")
       .doc("When true, enable temporary checkpoint locations force delete.")
       .booleanConf
       .createWithDefault(false)
@@ -1297,6 +1297,13 @@ object SQLConf {
       .doc("How long to delay polling new data when no data is available")
       .timeConf(TimeUnit.MILLISECONDS)
       .createWithDefault(10L)
+
+  val STREAMING_STOP_TIMEOUT =
+    buildConf("spark.sql.streaming.stopTimeout")
+      .doc("How long to wait for the streaming execution thread to stop when calling the " +
+        "streaming query's stop() method in milliseconds. 0 or negative values wait indefinitely.")
+      .timeConf(TimeUnit.MILLISECONDS)
+      .createWithDefault(0L)
 
   val STREAMING_NO_DATA_PROGRESS_EVENT_INTERVAL =
     buildConf("spark.sql.streaming.noDataProgressEventInterval")
