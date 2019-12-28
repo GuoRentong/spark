@@ -76,7 +76,7 @@ class IncrementalExecution(
    * with the desired literal
    */
   override
-  lazy val optimizedPlan: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.OPTIMIZATION) {
+  val optimizedPlan: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.OPTIMIZATION) {
     sparkSession.sessionState.optimizer.executeAndTrack(withCachedData,
       tracker) transformAllExpressions {
       case ts @ CurrentBatchTimestamp(timestamp, _, _) =>
