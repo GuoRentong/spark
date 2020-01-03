@@ -501,8 +501,8 @@ class SQLAppStatusListenerSuite extends SharedSparkSession with JsonTestUtils
     val expectedAccumValue2 = 54321L
     val physicalPlan = MyPlan(sqlContext.sparkContext, expectedAccumValue, expectedAccumValue2)
     val dummyQueryExecution = new QueryExecution(spark, LocalRelation()) {
-      override val sparkPlan = physicalPlan
-      override val executedPlan = physicalPlan
+      override lazy val sparkPlan = physicalPlan
+      override lazy val executedPlan = physicalPlan
     }
 
     SQLExecution.withNewExecutionId(spark, dummyQueryExecution) {

@@ -63,14 +63,12 @@ class QueryExecution(
     }
   }
 
-//  lazy
   val analyzed: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.ANALYSIS) {
     SparkSession.setActiveSession(sparkSession)
     // We can't clone `logical` here, which will reset the `_analyzed` flag.
     sparkSession.sessionState.analyzer.executeAndCheck(logical, tracker)
   }
 
-//  lazy
   val withCachedData: LogicalPlan = {
     assertAnalyzed()
     assertSupported()
@@ -79,14 +77,12 @@ class QueryExecution(
     sparkSession.sharedState.cacheManager.useCachedData(analyzed.clone())
   }
 
-//  lazy
   val optimizedPlan: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.OPTIMIZATION) {
     // clone the plan to avoid sharing the plan instance between different stages like analyzing,
     // optimizing and planning.
     sparkSession.sessionState.optimizer.executeAndTrack(withCachedData.clone(), tracker)
   }
 
-//  lazy
   val sparkPlan: SparkPlan = tracker.measurePhase(QueryPlanningTracker.PLANNING) {
     // Clone the logical plan here, in case the planner rules change the states of the logical plan.
     QueryExecution.createSparkPlan(sparkSession, planner, optimizedPlan.clone())
@@ -94,7 +90,6 @@ class QueryExecution(
 
   // executedPlan should not be used to initialize any SparkPlan. It should be
   // only used for execution.
-//  lazy
   val executedPlan: SparkPlan = tracker.measurePhase(QueryPlanningTracker.PLANNING) {
     // clone the plan to avoid sharing the plan instance between different stages like analyzing,
     // optimizing and planning.
@@ -332,4 +327,3 @@ object QueryExecution {
     prepareExecutedPlan(spark, sparkPlan)
   }
 }
-

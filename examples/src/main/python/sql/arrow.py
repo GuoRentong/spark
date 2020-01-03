@@ -46,6 +46,7 @@ def dataframe_with_arrow_example(spark):
 
     # Convert the Spark DataFrame back to a Pandas DataFrame using Arrow
     result_pdf = df.select("*").toPandas()
+
     # $example off:dataframe_with_arrow$
     print("Pandas DataFrame result statistics:\n%s\n" % str(result_pdf.describe()))
 
