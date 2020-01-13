@@ -1,32 +1,21 @@
 
-package org.apache.spark.examples.sql
+package org.apache.spark.examples.oxygen
 
 // $example on:programmatic_schema$
-
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.Row
 // $example off:programmatic_schema$
 // $example on:init_session$
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.Strategy
-import org.apache.spark.sql.catalyst.expressions.{Alias, EqualTo}
-import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, Join, Range}
-import org.apache.spark.sql.catalyst.expressions.Multiply
-import org.apache.spark.sql.catalyst.plans.Inner
-import org.apache.spark.sql.catalyst.rules.Rule
-import org.apache.spark.sql.catalyst.expressions.Literal
-import org.apache.spark.sql.execution.{ProjectExec, RangeExec, SparkPlan}
-import org.apache.spark.sql.SparkSessionExtensions
-import org.apache.spark.sql.catalyst.parser.ParserInterface
-import org.apache.spark.sql.catalyst.plans.logical.Project
+import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
+import org.apache.spark.sql.catalyst.{FunctionIdentifier, TableIdentifier}
 import org.apache.spark.sql.catalyst.analysis.UnresolvedStar
-import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.catalyst.TableIdentifier
-import org.apache.spark.sql.catalyst.FunctionIdentifier
+import org.apache.spark.sql.catalyst.expressions.{Expression, Literal, Multiply}
+import org.apache.spark.sql.catalyst.parser.ParserInterface
+import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, Project}
+import org.apache.spark.sql.catalyst.rules.Rule
 
 // $example off:init_session$
 // $example on:programmatic_schema$
 // $example on:data_types$
+import org.apache.spark.sql._
 import org.apache.spark.sql.types._
 // $example off:data_types$
 // $example off:programmatic_schema$

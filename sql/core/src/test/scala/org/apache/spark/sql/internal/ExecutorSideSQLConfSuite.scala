@@ -144,6 +144,6 @@ case class SQLConfAssertPlan(confToCheck: Seq[(String, String)]) extends LeafExe
 
 case class FakeQueryExecution(spark: SparkSession, physicalPlan: SparkPlan)
     extends QueryExecution(spark, LocalRelation()) {
-  override val sparkPlan: SparkPlan = physicalPlan
-  override val executedPlan: SparkPlan = physicalPlan
+  override lazy val sparkPlan: SparkPlan = physicalPlan
+  override lazy val executedPlan: SparkPlan = physicalPlan
 }

@@ -63,13 +63,13 @@ class QueryExecution(
     }
   }
 
-  val analyzed: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.ANALYSIS) {
+  lazy val analyzed: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.ANALYSIS) {
     SparkSession.setActiveSession(sparkSession)
     // We can't clone `logical` here, which will reset the `_analyzed` flag.
     sparkSession.sessionState.analyzer.executeAndCheck(logical, tracker)
   }
 
-  val withCachedData: LogicalPlan = {
+  lazy val withCachedData: LogicalPlan = {
     assertAnalyzed()
     assertSupported()
     // clone the plan to avoid sharing the plan instance between different stages like analyzing,
@@ -77,20 +77,20 @@ class QueryExecution(
     sparkSession.sharedState.cacheManager.useCachedData(analyzed.clone())
   }
 
-  val optimizedPlan: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.OPTIMIZATION) {
+  lazy val optimizedPlan: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.OPTIMIZATION) {
     // clone the plan to avoid sharing the plan instance between different stages like analyzing,
     // optimizing and planning.
     sparkSession.sessionState.optimizer.executeAndTrack(withCachedData.clone(), tracker)
   }
 
-  val sparkPlan: SparkPlan = tracker.measurePhase(QueryPlanningTracker.PLANNING) {
+  lazy val sparkPlan: SparkPlan = tracker.measurePhase(QueryPlanningTracker.PLANNING) {
     // Clone the logical plan here, in case the planner rules change the states of the logical plan.
     QueryExecution.createSparkPlan(sparkSession, planner, optimizedPlan.clone())
   }
 
   // executedPlan should not be used to initialize any SparkPlan. It should be
   // only used for execution.
-  val executedPlan: SparkPlan = tracker.measurePhase(QueryPlanningTracker.PLANNING) {
+  lazy val executedPlan: SparkPlan = tracker.measurePhase(QueryPlanningTracker.PLANNING) {
     // clone the plan to avoid sharing the plan instance between different stages like analyzing,
     // optimizing and planning.
     QueryExecution.prepareForExecution(preparations, sparkPlan.clone())

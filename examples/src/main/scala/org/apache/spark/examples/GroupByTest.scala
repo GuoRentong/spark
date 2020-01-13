@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
+// scalastyle:off println
 package org.apache.spark.examples
 
 import java.util.Random
 
 import org.apache.spark.sql.SparkSession
 
-// scalastyle:off println
 /**
  * Usage: GroupByTest [numMappers] [numKVPairs] [KeySize] [numReducers]
  */
@@ -47,7 +47,6 @@ object GroupByTest {
       }
       arr1
     }.cache()
-
     // Enforce that everything has been calculated and in cache
     pairs1.count()
 
