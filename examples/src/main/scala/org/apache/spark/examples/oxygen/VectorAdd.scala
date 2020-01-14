@@ -260,7 +260,7 @@ class ColumnarProjectExec(projectList: Seq[NamedExpression], child: SparkPlan)
     other.isInstanceOf[ColumnarProjectExec]
   }
 
-  override def hashCode(): Int = super.hashCode()
+  override def hashCode(): Int = super.hashCode
 }
 
 object ColumnarBindReferences extends Logging {
