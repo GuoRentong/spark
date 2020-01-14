@@ -24,7 +24,6 @@ object Oxygen {
     spark.sessionState.functionRegistry.createOrReplaceTempFunction("inc", Inc)
 
     Logger.getLogger("org").setLevel(Level.WARN)
-
     assert(
       spark.sessionState.columnarRules
         .contains(MyColumarRule(PreRuleReplaceAddWithBrokenVersion(), MyPostRule())))
@@ -37,7 +36,7 @@ object Oxygen {
     val df = spark.sql("select vals + 2, vals + 1 , vals + 100 from data")
     df.collect().foreach(println)
 
-    val df2 = spark.sql("select inc(vals),inc(vals) from data")
+    val df2 = spark.sql("select sum(inc(vals)) from data")
     df2.collect().foreach(println)
 
     //    val df = data.selectExpr("vals + 1")

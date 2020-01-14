@@ -3,11 +3,10 @@
  */
 
 package org.apache.spark.examples.oxygen
-import org.apache.log4j.{Level, Logger}
+
 import org.apache.spark.TaskContext
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{
@@ -25,7 +24,6 @@ import org.apache.spark.sql.catalyst.expressions.{
 import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.execution.vectorized.OnHeapColumnVector
 import org.apache.spark.sql.execution.{ColumnarRule, ProjectExec, RowToColumnarExec, SparkPlan}
-import org.apache.spark.sql.internal.SQLConf.COLUMN_BATCH_SIZE
 import org.apache.spark.sql.types.{DataType, Decimal, LongType, Metadata}
 import org.apache.spark.sql.vectorized.{ColumnVector, ColumnarArray, ColumnarBatch, ColumnarMap}
 import org.apache.spark.unsafe.types.UTF8String
@@ -234,6 +232,7 @@ class ColumnarProjectExec(projectList: Seq[NamedExpression], child: SparkPlan)
       ColumnarBindReferences.bindReferences(
         projectList.asInstanceOf[Seq[ColumnarExpression]],
         child.output)
+
     val rdd = child.executeColumnar()
     rdd.mapPartitions(
       (itr) =>
