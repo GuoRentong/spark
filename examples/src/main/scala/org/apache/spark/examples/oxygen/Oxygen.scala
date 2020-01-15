@@ -13,7 +13,7 @@ object Oxygen {
       .builder()
       .appName("VectorAdd")
       .master("local[*]")
-      .config(COLUMN_BATCH_SIZE.key, 3)
+      .config("spark.driver.memory", "1g")
       .config("parquetVectorizedReaderEnabled", true)
       .withExtensions { extensions =>
         extensions.injectColumnar(session =>
