@@ -20,47 +20,41 @@ object Oxygen {
       .config("spark.sql.execution.arrow.enabled", "true")
       .config("parquetVectorizedReaderEnabled", "true")
       .config("spark.files.maxPartitionBytes", "1g")
-//      .withExtensions { extensions =>
-//        extensions.injectColumnar(session =>
-//          MyColumarRule(PreRuleReplaceAddWithBrokenVersion(), MyPostRule()))
-//      }
+      .withExtensions { extensions =>
+        extensions.injectColumnar(session =>
+          MyColumarRule(PreRuleReplaceAddWithBrokenVersion(), MyPostRule()))
+      }
       .getOrCreate()
 
-//    spark.sessionState.functionRegistry.createOrReplaceTempFunction("inc", Inc)
-
+    spark.sessionState.functionRegistry.createOrReplaceTempFunction("inc", Inc)
     Logger.getLogger("org").setLevel(Level.WARN)
-//    assert(
-//      spark.sessionState.columnarRules
-//        .contains(MyColumarRule(PreRuleReplaceAddWithBrokenVersion(), MyPostRule())))
+
+    assert(
+      spark.sessionState.columnarRules
+        .contains(MyColumarRule(PreRuleReplaceAddWithBrokenVersion(), MyPostRule())))
+
     val t0 = logger("worker begin")
-    val input: Seq[Long] = (0L until 1024L * 1024L * 4).toArray.toSeq
-//    val input: Seq[Long] = Seq(0L, 1024L)
-    import spark.implicits._
 
     val t1 = logger("input ready")
-    val idf = input.toDF("vals").repartition(100)
+    val idf = spark.read.parquet("/home/mike/workspace/data/fucker.parquet")
 
     val t2 = logger("idf ready")
-    println(idf.rdd.getNumPartitions)
+    idf.createTempView("data")1
 
-    idf.write.parquet("/home/mike/workspace/data/fucker.parquet"
-
-    idf.createOrReplaceTempView("data")
     val t3 = logger("register view ready")
 
     val df = spark.sql("select vals + 1 from data")
     df.collect()
+
     val t4 = logger("selector to array ready")
 
 //    val df2 = spark.sql("select inc(vals) as res from data")
-//
-//    df2.collect().foreach(println)
+//    df2.collect()
+
     val arr = df.collect()
     val sum = arr.map(_.get(0).asInstanceOf[Long]).sum
     println(s"sum=${sum}")
     val t5 = logger("summer")
-    //    val df = data.selectExpr("vals + 1")
-    //    df.collect().foreach(println)
 
     spark.stop()
   }
