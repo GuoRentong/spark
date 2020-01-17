@@ -1,17 +1,18 @@
 // dog testing
-package org.apache.spark.examples.oxygen
 
 import java.lang.System.nanoTime
+import java.io.File
 
 import org.apache.log4j.{Level, Logger}
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
 
 // scalastyle:off println
-object Oxygen {
-  val init_time = nanoTime().toDouble * 1e-9
-  var last_time = init_time
+object Oxygen extends Logging {
 
   def main(args: Array[String]): Unit = {
+    Logger.getLogger("org").setLevel(Level.WARN)
+
     val spark = SparkSession
       .builder()
       .appName("VectorAdd")
@@ -20,50 +21,38 @@ object Oxygen {
       .config("spark.sql.execution.arrow.enabled", "true")
       .config("parquetVectorizedReaderEnabled", "true")
       .config("spark.files.maxPartitionBytes", "1g")
-      .withExtensions { extensions =>
-        extensions.injectColumnar(session =>
-          MyColumarRule(PreRuleReplaceAddWithBrokenVersion(), MyPostRule()))
-      }
+      .config("", "")
       .getOrCreate()
+    import spark.implicits._
 
-    spark.sessionState.functionRegistry.createOrReplaceTempFunction("inc", Inc)
-    Logger.getLogger("org").setLevel(Level.WARN)
+    log.warn("fuck")
 
-    assert(
-      spark.sessionState.columnarRules
-        .contains(MyColumarRule(PreRuleReplaceAddWithBrokenVersion(), MyPostRule())))
+    val FILENAME = "/home/mike/workspace/data/fucker2.parquet"
+    val is_exist = new File(FILENAME).exists()
 
-    val t0 = logger("worker begin")
+    log.warn("fuck")
+    if (!is_exist) {
+      println("initializing file... shoule be slow...")
+      val tmp_df = (0L until 16L * 1024L * 1024L).toDF("vals")
+      tmp_df.write.parquet(FILENAME)
+      println("initialized")
+    }
 
-    val t1 = logger("input ready")
-    val idf = spark.read.parquet("/home/mike/workspace/data/fucker.parquet")
+    log.warn("fuck")
+    val idf = spark.read.parquet(FILENAME)
 
-    val t2 = logger("idf ready")
-    idf.createTempView("data")1
+    log.warn("fuck")
+    idf.createOrReplaceTempView("data")
 
-    val t3 = logger("register view ready")
-
+    log.warn("fuck")
     val df = spark.sql("select vals + 1 from data")
     df.collect()
-
-    val t4 = logger("selector to array ready")
-
-//    val df2 = spark.sql("select inc(vals) as res from data")
-//    df2.collect()
 
     val arr = df.collect()
     val sum = arr.map(_.get(0).asInstanceOf[Long]).sum
     println(s"sum=${sum}")
-    val t5 = logger("summer")
 
     spark.stop()
-  }
-
-  def logger(msg: String): Double = {
-    val time = nanoTime().toDouble * 1e-9
-    println(s"${msg} @delta=${time - last_time} total=${time - init_time}")
-    last_time = time
-    time
   }
 }
 // scalastyle:on println
