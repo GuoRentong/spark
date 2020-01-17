@@ -5,7 +5,6 @@
 package org.apache.spark.examples.oxygen.demo
 
 import org.apache.spark.TaskContext
-import org.apache.spark.examples.oxygen.demo.ColumnarExpression
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
