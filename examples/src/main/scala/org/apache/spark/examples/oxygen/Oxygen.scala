@@ -25,7 +25,9 @@ object Oxygen extends Logging {
       .getOrCreate()
     import spark.implicits._
 
-    log.warn("fuck")
+    OxygenUDF.register(spark)
+
+    Oxygen.log.warn("fuck")
 
     val FILENAME = "/home/mike/workspace/data/fucker2.parquet"
     val is_exist = new File(FILENAME).exists()
@@ -45,7 +47,7 @@ object Oxygen extends Logging {
     idf.createOrReplaceTempView("data")
 
     log.warn("fuck")
-    val df = spark.sql("select vals + 1 from data")
+    val df = spark.sql("select inc(vals) from data")
     df.collect()
 
     val arr = df.collect()

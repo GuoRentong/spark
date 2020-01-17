@@ -38,7 +38,8 @@ class ExecutorSideSQLConfSuite extends SparkFunSuite with SQLTestUtils {
   // Create a new [[SparkSession]] running in local-cluster mode.
   override def beforeAll(): Unit = {
     super.beforeAll()
-    spark = SparkSession.builder()
+    spark = SparkSession
+      .builder()
       .master("local-cluster[2,1,1024]")
       .appName("testing")
       .getOrCreate()
@@ -54,22 +55,28 @@ class ExecutorSideSQLConfSuite extends SparkFunSuite with SQLTestUtils {
   }
 
   override def withSQLConf(pairs: (String, String)*)(f: => Unit): Unit = {
-    pairs.foreach { case (k, v) =>
-      SQLConf.get.setConfString(k, v)
+    pairs.foreach {
+      case (k, v) =>
+        SQLConf.get.setConfString(k, v)
     }
-    try f finally {
-      pairs.foreach { case (k, _) =>
-        SQLConf.get.unsetConf(k)
+    try f
+    finally {
+      pairs.foreach {
+        case (k, _) =>
+          SQLConf.get.unsetConf(k)
       }
     }
   }
 
   test("ReadOnlySQLConf is correctly created at the executor side") {
     withSQLConf("spark.sql.x" -> "a") {
-      val checks = spark.range(10).mapPartitions { _ =>
-        val conf = SQLConf.get
-        Iterator(conf.isInstanceOf[ReadOnlySQLConf] && conf.getConfString("spark.sql.x") == "a")
-      }.collect()
+      val checks = spark
+        .range(10)
+        .mapPartitions { _ =>
+          val conf = SQLConf.get
+          Iterator(conf.isInstanceOf[ReadOnlySQLConf] && conf.getConfString("spark.sql.x") == "a")
+        }
+        .collect()
       assert(checks.forall(_ == true))
     }
   }
@@ -87,26 +94,31 @@ class ExecutorSideSQLConfSuite extends SparkFunSuite with SQLTestUtils {
 
   test("SPARK-24727 CODEGEN_CACHE_MAX_ENTRIES is correctly referenced at the executor side") {
     withSQLConf(StaticSQLConf.CODEGEN_CACHE_MAX_ENTRIES.key -> "300") {
-      val checks = spark.range(10).mapPartitions { _ =>
-        val conf = SQLConf.get
-        Iterator(conf.isInstanceOf[ReadOnlySQLConf] &&
-          conf.getConfString(StaticSQLConf.CODEGEN_CACHE_MAX_ENTRIES.key) == "300")
-      }.collect()
+      val checks = spark
+        .range(10)
+        .mapPartitions { _ =>
+          val conf = SQLConf.get
+          Iterator(conf.isInstanceOf[ReadOnlySQLConf] &&
+            conf.getConfString(StaticSQLConf.CODEGEN_CACHE_MAX_ENTRIES.key) == "300")
+        }
+        .collect()
       assert(checks.forall(_ == true))
     }
   }
 
   test("SPARK-22219: refactor to control to generate comment") {
     Seq(true, false).foreach { flag =>
-      withSQLConf(StaticSQLConf.CODEGEN_COMMENTS.key -> flag.toString,
+      withSQLConf(
+        StaticSQLConf.CODEGEN_COMMENTS.key -> flag.toString,
         SQLConf.ADAPTIVE_EXECUTION_ENABLED.key -> "false") {
         // with AQE on, the WholeStageCodegen rule is applied when running QueryStageExec.
-        val res = codegenStringSeq(spark.range(10).groupBy(col("id") * 2).count()
-          .queryExecution.executedPlan)
+        val res = codegenStringSeq(
+          spark.range(10).groupBy(col("id") * 2).count().queryExecution.executedPlan)
         assert(res.length == 2)
-        assert(res.forall { case (_, code, _) =>
-          (code.contains("* Codegend pipeline") == flag) &&
-            (code.contains("// input[") == flag)
+        assert(res.forall {
+          case (_, code, _) =>
+            (code.contains("* Codegend pipeline") == flag) &&
+              (code.contains("// input[") == flag)
         })
       }
     }
@@ -129,13 +141,13 @@ class ExecutorSideSQLConfSuite extends SparkFunSuite with SQLTestUtils {
 
 case class SQLConfAssertPlan(confToCheck: Seq[(String, String)]) extends LeafExecNode {
   override protected def doExecute(): RDD[InternalRow] = {
-    sqlContext
-      .sparkContext
+    sqlContext.sparkContext
       .parallelize(0 until 2, 2)
       .mapPartitions { it =>
         val confs = SQLConf.get
-        confToCheck.foreach { case (key, expectedValue) =>
-          assert(confs.getConfString(key) == expectedValue)
+        confToCheck.foreach {
+          case (key, expectedValue) =>
+            assert(confs.getConfString(key) == expectedValue)
         }
         it.map(i => InternalRow.fromSeq(Seq(i)))
       }
@@ -146,6 +158,6 @@ case class SQLConfAssertPlan(confToCheck: Seq[(String, String)]) extends LeafExe
 
 case class FakeQueryExecution(spark: SparkSession, physicalPlan: SparkPlan)
     extends QueryExecution(spark, LocalRelation()) {
-  override lazy val sparkPlan: SparkPlan = physicalPlan
-  override lazy val executedPlan: SparkPlan = physicalPlan
+  override val sparkPlan: SparkPlan = physicalPlan
+  override val executedPlan: SparkPlan = physicalPlan
 }

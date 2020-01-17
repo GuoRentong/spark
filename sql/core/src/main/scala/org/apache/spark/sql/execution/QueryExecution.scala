@@ -63,13 +63,13 @@ class QueryExecution(
     }
   }
 
-  lazy val analyzed: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.ANALYSIS) {
+  val analyzed: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.ANALYSIS) {
     SparkSession.setActiveSession(sparkSession)
     // We can't clone `logical` here, which will reset the `_analyzed` flag.
     sparkSession.sessionState.analyzer.executeAndCheck(logical, tracker)
   }
 
-  lazy val withCachedData: LogicalPlan = {
+  val withCachedData: LogicalPlan = {
     assertAnalyzed()
     assertSupported()
     // clone the plan to avoid sharing the plan instance between different stages like analyzing,
@@ -77,20 +77,20 @@ class QueryExecution(
     sparkSession.sharedState.cacheManager.useCachedData(analyzed.clone())
   }
 
-  lazy val optimizedPlan: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.OPTIMIZATION) {
+  val optimizedPlan: LogicalPlan = tracker.measurePhase(QueryPlanningTracker.OPTIMIZATION) {
     // clone the plan to avoid sharing the plan instance between different stages like analyzing,
     // optimizing and planning.
     sparkSession.sessionState.optimizer.executeAndTrack(withCachedData.clone(), tracker)
   }
 
-  lazy val sparkPlan: SparkPlan = tracker.measurePhase(QueryPlanningTracker.PLANNING) {
+  val sparkPlan: SparkPlan = tracker.measurePhase(QueryPlanningTracker.PLANNING) {
     // Clone the logical plan here, in case the planner rules change the states of the logical plan.
     QueryExecution.createSparkPlan(sparkSession, planner, optimizedPlan.clone())
   }
 
   // executedPlan should not be used to initialize any SparkPlan. It should be
   // only used for execution.
-  lazy val executedPlan: SparkPlan = tracker.measurePhase(QueryPlanningTracker.PLANNING) {
+  val executedPlan: SparkPlan = tracker.measurePhase(QueryPlanningTracker.PLANNING) {
     // clone the plan to avoid sharing the plan instance between different stages like analyzing,
     // optimizing and planning.
     QueryExecution.prepareForExecution(preparations, sparkPlan.clone())
@@ -106,8 +106,8 @@ class QueryExecution(
    * Given QueryExecution is not a public class, end users are discouraged to use this: please
    * use `Dataset.rdd` instead where conversion will be applied.
    */
-  lazy val toRdd: RDD[InternalRow] = new SQLExecutionRDD(
-    executedPlan.execute(), sparkSession.sessionState.conf)
+  lazy val toRdd: RDD[InternalRow] =
+    new SQLExecutionRDD(executedPlan.execute(), sparkSession.sessionState.conf)
 
   /** Get the metrics observed during the execution of the query plan. */
   def observedMetrics: Map[String, Row] = CollectMetricsExec.collect(executedPlan)
@@ -140,8 +140,14 @@ class QueryExecution(
       // This is used only by explaining `Dataset/DataFrame` created by `spark.readStream`, so the
       // output mode does not matter since there is no `Sink`.
       new IncrementalExecution(
-        sparkSession, logical, OutputMode.Append(), "<unknown>",
-        UUID.randomUUID, UUID.randomUUID, 0, OffsetSeqMetadata(0, 0))
+        sparkSession,
+        logical,
+        OutputMode.Append(),
+        "<unknown>",
+        UUID.randomUUID,
+        UUID.randomUUID,
+        0,
+        OffsetSeqMetadata(0, 0))
     } else {
       this
     }
@@ -172,8 +178,9 @@ class QueryExecution(
     try {
       append(
         truncatedString(
-          analyzed.output.map(o => s"${o.name}: ${o.dataType.simpleString}"), ", ", maxFields)
-      )
+          analyzed.output.map(o => s"${o.name}: ${o.dataType.simpleString}"),
+          ", ",
+          maxFields))
       append("\n")
       QueryPlan.append(analyzed, append, verbose, addSuffix, maxFields)
       append("\n== Optimized Logical Plan ==\n")
@@ -220,7 +227,7 @@ class QueryExecution(
   /** A special namespace for commands that can be used to debug query execution. */
   // scalastyle:off
   object debug {
-  // scalastyle:on
+    // scalastyle:on
 
     /**
      * Prints to stdout all the generated code found in this plan (i.e. the output of each
@@ -265,6 +272,7 @@ class QueryExecution(
 }
 
 object QueryExecution {
+
   /**
    * Construct a sequence of rules that are used to prepare a planned [[SparkPlan]] for execution.
    * These rules will make sure subqueries are planned, make use the data partitioning and ordering
@@ -279,12 +287,12 @@ object QueryExecution {
       PlanDynamicPruningFilters(sparkSession),
       PlanSubqueries(sparkSession),
       EnsureRequirements(sparkSession.sessionState.conf),
-      ApplyColumnarRulesAndInsertTransitions(sparkSession.sessionState.conf,
+      ApplyColumnarRulesAndInsertTransitions(
+        sparkSession.sessionState.conf,
         sparkSession.sessionState.columnarRules),
       CollapseCodegenStages(sparkSession.sessionState.conf),
       ReuseExchange(sparkSession.sessionState.conf),
-      ReuseSubquery(sparkSession.sessionState.conf)
-    )
+      ReuseSubquery(sparkSession.sessionState.conf))
 
   /**
    * Prepares a planned [[SparkPlan]] for execution by inserting shuffle operations and internal

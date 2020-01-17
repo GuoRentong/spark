@@ -2,7 +2,6 @@
 package org.apache.spark.examples.oxygen
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{
   ExprId,
   Expression,
@@ -27,7 +26,7 @@ object OxygenUDF {
       new OxygenFunction("inc"),
       LongType,
       udfDeterministic = true)
-    spark.udf.register("inc", udf.builder(_))
+    spark.sessionState.functionRegistry.createOrReplaceTempFunction("inc", udf.builder)
   }
 
 }
@@ -43,7 +42,7 @@ case class UserDefinedOxygenFunction(
   }
 }
 
-class OxygenFunction(name: String) {
+class OxygenFunction(name: String) extends Serializable {
   // TODO: add new methods to use
 }
 
