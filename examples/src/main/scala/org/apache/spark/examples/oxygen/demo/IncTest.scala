@@ -42,7 +42,7 @@ object IncTest extends Logging {
 
     val t3 = logger("register view ready")
 
-    val df = spark.sql("select vals + 1 from data")
+    val df = spark.sql("select vals * 2 + 1 from data")
     df.collect()
 
     val t4 = logger("selector to array ready")
