@@ -31,7 +31,6 @@ object OxygenUDF {
       udfDeterministic = true)
     spark.sessionState.functionRegistry.createOrReplaceTempFunction("inc", udf.builder)
   }
-
 }
 
 // this is OxygenUDF builder

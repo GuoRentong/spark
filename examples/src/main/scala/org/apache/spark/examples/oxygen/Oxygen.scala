@@ -1,6 +1,5 @@
 // dog testing
 package org.apache.spark.examples.oxygen
-import java.lang.System.nanoTime
 import java.io.File
 
 import org.apache.log4j.{Level, Logger}
@@ -21,13 +20,11 @@ object Oxygen extends Logging {
       .config("spark.sql.execution.arrow.enabled", "true")
       .config("parquetVectorizedReaderEnabled", "true")
       .config("spark.files.maxPartitionBytes", "1g")
-      .config("", "")
       .getOrCreate()
     import spark.implicits._
 
     OxygenUDF.register(spark)
-
-    Oxygen.log.warn("fuck")
+    spark.experimental.extraOptimizations = Oxygen.log.warn("fuck")
 
     val FILENAME = "/home/mike/workspace/data/fucker2.parquet"
     val is_exist = new File(FILENAME).exists()

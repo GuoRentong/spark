@@ -13,6 +13,8 @@ import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, Project, Subque
 
 import scala.collection.mutable
 
+object OxygenExtractor {}
+
 //object ExtractOxygenUDFs extends Rule[LogicalPlan] with PredicateHelper {}
 object ExtractOxygenUDFs extends Rule[LogicalPlan] with PredicateHelper {
   def apply(plan: LogicalPlan): LogicalPlan = plan match {
