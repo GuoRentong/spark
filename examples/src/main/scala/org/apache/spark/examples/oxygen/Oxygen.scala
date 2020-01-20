@@ -24,7 +24,7 @@ object Oxygen extends Logging {
     import spark.implicits._
 
     OxygenUDF.register(spark)
-    spark.experimental.extraOptimizations = Oxygen.log.warn("fuck")
+    Oxygen.log.warn("fuck")
 
     val FILENAME = "/home/mike/workspace/data/fucker2.parquet"
     val is_exist = new File(FILENAME).exists()
