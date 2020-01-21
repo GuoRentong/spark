@@ -30,7 +30,10 @@ object Oxygen extends Logging {
       .config("spark.sql.execution.arrow.enabled", "true")
       .config("parquetVectorizedReaderEnabled", "true")
       .config("spark.files.maxPartitionBytes", "1g")
-      .withExtensions(ext => rules.foreach(rule => ext.injectOptimizerRule(_ => rule)))
+      .withExtensions(ext => {
+        rules.foreach(rule => ext.injectOptimizerRule(_ => rule))
+
+      })
       .getOrCreate()
     import spark.implicits._
 

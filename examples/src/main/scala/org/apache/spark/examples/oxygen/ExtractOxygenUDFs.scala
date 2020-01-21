@@ -13,6 +13,7 @@ object ExtractOxygenUDFs extends Rule[LogicalPlan] with PredicateHelper {
     case s: Subquery if s.correlated => plan
     case _ =>
       plan transformUp {
+        case a: ArrowEvalOxygen => a
         case plan: LogicalPlan => extract(plan)
       }
   }
