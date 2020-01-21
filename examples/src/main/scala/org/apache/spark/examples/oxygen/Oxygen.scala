@@ -5,12 +5,22 @@ import java.io.File
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.catalyst.optimizer.{
+  ColumnPruning,
+  PushPredicateThroughNonJoin,
+  RemoveNoopOperators
+}
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.catalyst.rules.Rule
 
 // scalastyle:off println
 object Oxygen extends Logging {
 
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org").setLevel(Level.WARN)
+
+    val rules: Seq[Rule[LogicalPlan]] =
+      Seq(ExtractOxygenUDFs, ColumnPruning, PushPredicateThroughNonJoin, RemoveNoopOperators)
 
     val spark = SparkSession
       .builder()
@@ -20,6 +30,7 @@ object Oxygen extends Logging {
       .config("spark.sql.execution.arrow.enabled", "true")
       .config("parquetVectorizedReaderEnabled", "true")
       .config("spark.files.maxPartitionBytes", "1g")
+      .withExtensions(ext => rules.foreach(rule => ext.injectOptimizerRule(_ => rule)))
       .getOrCreate()
     import spark.implicits._
 

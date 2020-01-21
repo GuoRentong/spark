@@ -1,15 +1,10 @@
 // dog testing
 package org.apache.spark.examples.oxygen
 
-import org.apache.commons.digester.Rule
-import org.apache.spark.sql.catalyst.expressions.{
-  Attribute,
-  AttributeReference,
-  AttributeSet,
-  Expression,
-  PredicateHelper
-}
-import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, Project, Subquery, UnaryNode}
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.catalyst.expressions.{AttributeReference, Expression, PredicateHelper}
+import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, Project, Subquery}
+import org.apache.spark.sql.catalyst.rules.Rule
 
 import scala.collection.mutable
 

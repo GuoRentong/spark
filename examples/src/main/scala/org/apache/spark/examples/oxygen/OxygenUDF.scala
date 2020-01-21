@@ -13,6 +13,7 @@ import org.apache.spark.sql.catalyst.expressions.{
   UserDefinedExpression
 }
 import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, UnaryNode}
+import org.apache.spark.sql.execution.SparkOptimizer
 import org.apache.spark.sql.types.{DataType, LongType}
 
 // should follow PythonUDF ways
