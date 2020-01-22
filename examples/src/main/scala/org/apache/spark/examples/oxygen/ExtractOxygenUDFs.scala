@@ -1,10 +1,11 @@
 // dog testing
 package org.apache.spark.examples.oxygen
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SparkSession, Strategy}
 import org.apache.spark.sql.catalyst.expressions.{AttributeReference, Expression, PredicateHelper}
-import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, Project, Subquery}
+import org.apache.spark.sql.catalyst.plans.logical.{BatchEvalPython, LogicalPlan, Project, Subquery}
 import org.apache.spark.sql.catalyst.rules.Rule
+import org.apache.spark.sql.execution.SparkPlan
 
 import scala.collection.mutable
 
@@ -72,5 +73,15 @@ object ExtractOxygenUDFs extends Rule[LogicalPlan] with PredicateHelper {
 
   private def hasScalarOxygenUDF(e: Expression): Boolean = {
     e.find(OxygenUDF.isScalarOxygenUDF).isDefined
+  }
+}
+
+object OxygenEvalsStrategy extends Strategy {
+  override def apply(plan: LogicalPlan): Seq[SparkPlan] = {
+    plan match {
+      case BatchEval
+    }
+//    ArrowEvalOxygen()
+    // dog testing
   }
 }

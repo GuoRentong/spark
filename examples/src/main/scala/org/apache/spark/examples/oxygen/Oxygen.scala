@@ -32,7 +32,7 @@ object Oxygen extends Logging {
       .config("spark.files.maxPartitionBytes", "1g")
       .withExtensions(ext => {
         rules.foreach(rule => ext.injectOptimizerRule(_ => rule))
-
+        ext.injectPlannerStrategy(_ => OxygenEvalsStrategy)
       })
       .getOrCreate()
     import spark.implicits._
@@ -59,6 +59,9 @@ object Oxygen extends Logging {
 
     log.warn("fuck")
     val df = spark.sql("select inc(vals) from data")
+    val logicalPlan = df.queryExecution.withCachedData
+    val sparkPlan = df.queryExecution.sparkPlan
+
     df.collect()
 
     val arr = df.collect()

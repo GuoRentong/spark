@@ -1,7 +1,10 @@
 // dog testing
 package org.apache.spark.examples.oxygen
 
+import org.apache.spark.TaskContext
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{
   Attribute,
   AttributeSet,
@@ -13,7 +16,7 @@ import org.apache.spark.sql.catalyst.expressions.{
   UserDefinedExpression
 }
 import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, UnaryNode}
-import org.apache.spark.sql.execution.SparkOptimizer
+import org.apache.spark.sql.execution.{SparkPlan, UnaryExecNode}
 import org.apache.spark.sql.types.{DataType, LongType}
 
 // should follow PythonUDF ways
@@ -71,13 +74,3 @@ private[oxygen] case class OxygenUDF(
 
   override def nullable: Boolean = true
 }
-
-trait BaseEvalOxygen extends UnaryNode {
-  def udfs: Seq[OxygenUDF]
-  def resultAttrs: Seq[Attribute]
-  override def output: Seq[Attribute] = child.output ++ resultAttrs
-  override def producedAttributes: AttributeSet = AttributeSet(resultAttrs)
-}
-
-case class ArrowEvalOxygen(udfs: Seq[OxygenUDF], resultAttrs: Seq[Attribute], child: LogicalPlan)
-    extends BaseEvalOxygen
